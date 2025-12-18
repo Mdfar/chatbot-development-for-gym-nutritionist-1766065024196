@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Gym Nutritionist AI</title> <style> body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } .chat-container { width: 400px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; height: 600px; } .chat-header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-weight: bold; } .chat-box { flex: 1; padding: 15px; overflow-y: auto; background: #ecf0f1; } .message { margin-bottom: 10px; max-width: 80%; padding: 10px; border-radius: 8px; font-size: 14px; line-height: 1.4; } .user-message { background: #3498db; color: white; align-self: flex-end; margin-left: auto; } .bot-message { background: #fff; color: #333; border: 1px solid #ddd; align-self: flex-start; } .input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #ddd; } input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; } button { background: #27ae60; color: white; border: none; padding: 10px 15px; margin-left: 10px; border-radius: 5px; cursor: pointer; } button:hover { background: #219150; } .loading { font-style: italic; color: #888; font-size: 12px; margin-left: 10px; display: none; } </style> </head> <body>
+
+<div class="chat-container"> <div class="chat-header">FitFuel Nutritionist 🍎</div> <div class="chat-box" id="chat-box"> <div class="message bot-message">Hello! I'm FitFuel. I can help you with meal plans, macros, and supplement advice. What's your current fitness goal?</div> </div> <div class="loading" id="loading">Thinking...</div> <div class="input-area"> <input type="text" id="user-input" placeholder="Ask about meal plans..." onkeypress="handleEnter(event)"> <button onclick="sendMessage()">Send</button> </div> </div>
+
+<script> async function sendMessage() { const inputField = document.getElementById('user-input'); const chatBox = document.getElementById('chat-box'); const loading = document.getElementById('loading'); const message = inputField.value.trim();
+
+    if (!message) return;
+
+    // Append User Message
+    const userDiv = document.createElement(&#39;div&#39;);
+    userDiv.className = &#39;message user-message&#39;;
+    userDiv.textContent = message;
+    chatBox.appendChild(userDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    inputField.value = &#39;&#39;;
+    loading.style.display = &#39;block&#39;;
+
+    try {
+        const response = await fetch(&#39;/chat&#39;, {
+            method: &#39;POST&#39;,
+            headers: { &#39;Content-Type&#39;: &#39;application/json&#39; },
+            body: JSON.stringify({ message: message })
+        });
+        const data = await response.json();
+
+        // Append Bot Message
+        const botDiv = document.createElement(&#39;div&#39;);
+        botDiv.className = &#39;message bot-message&#39;;
+        // Simple newline to break formatting for lists
+        botDiv.innerHTML = data.reply.replace(/\n/g, &#39;<br>&#39;);
+        chatBox.appendChild(botDiv);
+    } catch (error) {
+        console.error(&#39;Error:&#39;, error);
+        const errDiv = document.createElement(&#39;div&#39;);
+        errDiv.className = &#39;message bot-message&#39;;
+        errDiv.textContent = &quot;Sorry, I&#39;m having trouble connecting right now.&quot;;
+        chatBox.appendChild(errDiv);
+    } finally {
+        loading.style.display = &#39;none&#39;;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+
+function handleEnter(event) {
+    if (event.key === &#39;Enter&#39;) sendMessage();
+}
+
+
+</script>
+
+</body> </html>
